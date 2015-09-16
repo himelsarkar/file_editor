@@ -1,12 +1,13 @@
 document.addEventListener("deviceready", init, false);
+var obj
+
 function init() {
 	// var fileName = "www/index.txt"
  //    var pathName = cordova.file.applicationDirectory + fileName
 	// function readFromFile(fileName) {
 	   window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "test.txt", gotFile, fail)
 	// }
-    document.querySelector("#submit").addEventListener("touchend", writeFile(), fail)
-    // readFromFile(pathName)
+    document.getElementById("submit").addEventListener("click", writeFile)
 }
 
 function fail(event) {
@@ -15,6 +16,9 @@ function fail(event) {
 }
 
 function gotFile(fileEntry) {
+    console.log(fileEntry.isFile)
+    console.log(fileEntry.name)
+	obj = fileEntry
 	fileEntry.file(function(file) {
 		var reader = new FileReader();
         reader.onloadend = function(e) {
@@ -27,17 +31,20 @@ function gotFile(fileEntry) {
 }
 
 function writeFile() {
-
-	window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "test.txt", function(dirEntry) {
+	window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
+	  console.log("got main dir" + dirEntry.isDirectory)
+	  console.log(dirEntry.name)
 	  dirEntry.getFile("test.txt", {create: false}, function(file){
 		file.createWriter(function(e) {
-			// var content = document.querySelector('#textarea').innerHTML
-			var content = "Well, fuck you!"
+			var content = document.querySelector('#textarea').value
+			console.log(content)
             var bb = new Blob([content], {type: 'text/plain'})
-            fileWriter.write(bb);
+            e.write(bb);
 		});
-	})
-}, fail)
+	  })
+    }, fail)
+    init();
+    document.getElementById("confirmation").innerHTML = "You have just saved this file!";
 }
 
 
