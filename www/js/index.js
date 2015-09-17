@@ -1,19 +1,33 @@
 document.addEventListener("deviceready", init, false);
-var obj
 
 function init() {
-	// var fileName = "www/index.txt"
- //    var pathName = cordova.file.applicationDirectory + fileName
-	// function readFromFile(fileName) {
-	   window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "test.txt", gotFile, fail)
-	// }
-    document.getElementById("submit").addEventListener("click", writeFile)
+	window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "test.txt", gotFile, fail)
+	document.getElementById("submit").addEventListener("click", writeFile)
+	document.addEventListener("backbutton", onBackKey, false)
+}
+ 
+var counter = 0
+function onBackKey() {
+	counter = counter +1 
+	if ( counter === 2 ) {
+		onConfirm();
+	} else {
+		return
+	}
+
+	console.log("ghanti baja re!")
+}
+
+function onConfirm() {
+	counter = 0
+    navigator.app.exitApp();
 }
 
 function fail(event) {
 	console.log(event.code)
 	console.log("Some error happened!")
 }
+
 
 function gotFile(fileEntry) {
     console.log(fileEntry.isFile)
@@ -23,12 +37,13 @@ function gotFile(fileEntry) {
 		var reader = new FileReader();
         reader.onloadend = function(e) {
         	document.querySelector("#textarea").innerHTML = this.result
-        	console.log(this.result);
+        	initial = this.result       	
         }
         name = fileEntry.name
         reader.readAsText(file);
 	});
 }
+
 
 function writeFile() {
 	window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dirEntry) {
@@ -37,15 +52,19 @@ function writeFile() {
 	  dirEntry.getFile("test.txt", {create: false}, function(file){
 		file.createWriter(function(e) {
 			var content = document.querySelector('#textarea').value
-			console.log(content)
-            var bb = new Blob([content], {type: 'text/plain'})
-            e.write(bb);
+			if (content === initial) {
+				document.getElementById("confirmation").innerHTML = "You haven't made any changes!"
+				return
+			} else {
+			    var bb = new Blob([content], {type: 'text/plain'})
+                e.write(bb);
+                document.getElementById("confirmation").innerHTML = "You have just saved this file!";
+                document.getElementById("cancel").innerHTML = "Back"
+			}
 		});
 	  })
     }, fail)
-    init();
-    document.getElementById("confirmation").innerHTML = "You have just saved this file!";
-    document.getElementById("cancel").innerHTML = "Back"
+    init();  
 }
 
 
